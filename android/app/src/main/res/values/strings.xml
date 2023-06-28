@@ -2,16 +2,10 @@
     <string name="app_name">FFmpegKit x265encoder</string>
     <string name="encoder_tab">x265 encoding options</string>
     <string name="command_tab">COMMAND</string>
-    <string name="video_tab">VIDEO</string>
-    <string name="vidstab_tab">VID.STAB</string>
-    <string name="saf_tab">SAF</string>
     <string name="command_text_input_placeholder">Enter command</string>
     <string name="command_text_inputmp4">Input mp4 (without path)</string>
     <string name="output_label">Output file name will be displayed here</string>
     <string name="command_run_ffmpeg_button_text">RUN FFMPEG</string>
     <string name="command_run_ffprobe_button_text">RUN FFPROBE</string>
-    <string name="run_button_text">RUN</string>
-    <string name="encode_button_text">ENCODE</string>
-    <string name="vidstab_stabilize_video_button_text">STABILIZE VIDEO</string>
     <string name="cancel_button_text">Cancel</string>
 </resources>
