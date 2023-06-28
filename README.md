@@ -4,7 +4,7 @@
 
 This app is completely based on [FFmpegKit](https://github.com/arthenica/ffmpeg-kit)
 
-<img src="https://https://github.com/hvdwolf/x265encoder/blob/main/docs/assets/ffmpeg-kit-icon-v9.png" width="240">
+<img src="https://github.com/hvdwolf/x265encoder/blob/main/docs/assets/ffmpeg-kit-icon-v9.png" width="240">
 
 `FFmpegKit` is a collection of tools to use `FFmpeg` in `Android`, `iOS`, `Linux`, `macOS`, `tvOS`, `Flutter` and `React Native` applications.
 
