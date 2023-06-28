@@ -1,0 +1,12 @@
+#/bin/sh
+
+
+export "ANDROID_SDK_ROOT=/mnt/chromeos/removable/128GB/software/SDK_ROOT"
+export "ANDROID_HOME=/mnt/chromeos/removable/128GB/software/SDK_ROOT"
+export "SLAVE_AAPT_TIMEOUT=30"
+
+curpath=`pwd`
+rm -rf ${curpath}/app/build
+${curpath}/gradlew assembleDebug
+
+cp ./app/build/outputs/apk/debug/app-arm64-v8a-debug.apk x265encoder.apk

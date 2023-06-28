@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="encode_action">
+        <item>convert 4k2k</item>
+        <item>crop 4k2k</item>
+        <item>convert 4k720p</item>
+        <item>crop 4k720p</item>
+        <item>stabilize</item>
+        <item>deshake</item>
+    </string-array>
+</resources>
