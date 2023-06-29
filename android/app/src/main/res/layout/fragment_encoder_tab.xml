@@ -21,6 +21,11 @@
         tools:ignore="Autofill"
         tools:targetApi="cupcake" />
 
+    <CheckBox android:id="@+id/checkbox_overwrite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/checkbox_overwrite"/>
+
     <TextView
         android:id="@+id/outputLabel"
         android:layout_width="match_parent"

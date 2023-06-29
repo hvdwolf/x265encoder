@@ -4,6 +4,7 @@
     <string name="command_tab">COMMAND</string>
     <string name="command_text_input_placeholder">Enter command</string>
     <string name="command_text_inputmp4">Input mp4 (without path)</string>
+    <string name="checkbox_overwrite">Overwrite mp4 if exists"</string>
     <string name="output_label">Output file name will be displayed here</string>
     <string name="command_run_ffmpeg_button_text">RUN FFMPEG</string>
     <string name="command_run_ffprobe_button_text">RUN FFPROBE</string>

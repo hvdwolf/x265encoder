@@ -33,6 +33,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -53,6 +54,7 @@ import com.arthenica.ffmpegkit.SessionState;
 
 public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     private EditText mp4inputText;
+    private CheckBox checkboxOverwrite;
     private TextView outputLabel;
     private String selectedEncodeAction;
     private TextView outputText;
@@ -66,6 +68,7 @@ public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSe
         super.onViewCreated(view, savedInstanceState);
 
         mp4inputText = view.findViewById(R.id.mp4inputText);
+        checkboxOverwrite = view.findViewById(R.id.checkbox_overwrite);
         //mp4outputText = view.findViewById(R.id.mp4outputText);
         outputLabel = view.findViewById(R.id.outputLabel);
 
@@ -149,6 +152,9 @@ public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSe
         String fileName = mp4inputText.getText().toString();
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
         StringBuilder buildCommand = new StringBuilder();
+        if ( checkboxOverwrite.isChecked()) {
+            buildCommand.append(" -y ");
+        }
         buildCommand.append("-i /storage/emulated/0/DCIM/Camera/");
         buildCommand.append(String.format("%s", mp4inputText.getText().toString()));
         if ( actionString != "-vf deshake") {
