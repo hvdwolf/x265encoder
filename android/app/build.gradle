@@ -15,8 +15,8 @@ android {
         applicationId "com.arthenica.ffmpegkit.x265encoder"
         minSdk 24
         targetSdk 31
-        versionCode 2401
-        versionName "0.1"
+        versionCode 24011
+        versionName "0.11"
     }
     buildTypes {
         debug {

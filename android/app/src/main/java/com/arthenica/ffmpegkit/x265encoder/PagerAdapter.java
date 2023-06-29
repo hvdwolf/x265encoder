@@ -29,7 +29,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 public class PagerAdapter extends FragmentPagerAdapter {
-    private static final int NUMBER_OF_TABS = 10;
+    private static final int NUMBER_OF_TABS = 2;
 
     private final Context context;
 
