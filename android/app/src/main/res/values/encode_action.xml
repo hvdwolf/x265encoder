@@ -5,6 +5,10 @@
         <item>crop 4k2k</item>
         <item>convert 4k720p</item>
         <item>crop 4k720p</item>
+        <item>convert 4k2k portrait</item>
+        <item>crop 4k2k portrait</item>
+        <item>convert 4k720p portrait</item>
+        <item>crop 4k720p portrait</item>
         <item>stabilize</item>
         <item>deshake</item>
     </string-array>

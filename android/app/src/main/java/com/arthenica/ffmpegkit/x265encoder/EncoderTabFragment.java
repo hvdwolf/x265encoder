@@ -41,6 +41,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.arthenica.ffmpegkit.FFmpegKit;
@@ -50,7 +51,14 @@ import com.arthenica.ffmpegkit.FFmpegSessionCompleteCallback;
 import com.arthenica.ffmpegkit.LogCallback;
 import com.arthenica.ffmpegkit.LogRedirectionStrategy;
 import com.arthenica.ffmpegkit.ReturnCode;
+import com.arthenica.ffmpegkit.util.DialogUtil;
+import com.arthenica.ffmpegkit.util.ResourcesUtil;
+import com.arthenica.smartexception.java.Exceptions;
 import com.arthenica.ffmpegkit.SessionState;
+
+import java.io.File;
+import java.io.IOException;
+
 
 public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSelectedListener {
     private EditText mp4inputText;
@@ -58,6 +66,7 @@ public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSe
     private TextView outputLabel;
     private String selectedEncodeAction;
     private TextView outputText;
+    private AlertDialog stabilizeProgressDialog;
 
     public EncoderTabFragment() {
         super(R.layout.fragment_encoder_tab);
@@ -84,7 +93,12 @@ public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSe
 
             @Override
             public void onClick(View v) {
-                runFFmpeg();
+                String encodeAction = getSelectedEncodeAction();
+                if ( encodeAction != "stabilize") {
+                    runFFmpeg();
+                } else {
+                    stabilizeVideo();
+                }
             }
         });
 
@@ -114,6 +128,8 @@ public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSe
         // DO NOTHING
     }
 
+
+    // Start run of runFFmpeg for everything except stabilize
     public void runFFmpeg() {
         clearOutput();
 
@@ -137,10 +153,26 @@ public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSe
                 actionString = " -vf crop=1280:720 ";
                 fileNameAddString = "-crop-720p.mp4";
                 break;
-            case "stabilize":
+            case "convert 4k2k portrait":
+                actionString = " -vf scale=1080:1920 ";
+                fileNameAddString = "-1080p.mp4";
+                break;
+            case "crop 4k2k portrait":
+                actionString = " -vf crop=1080:1920 ";
+                fileNameAddString = "-crop-1080p.mp4";
+                break;
+            case "convert 4k720p portrait":
+                actionString = " -vf scale=720:1280 ";
+                fileNameAddString = "-720p.mp4";
+                break;
+            case "crop 4k720p portrait":
+                actionString = " -vf crop=720:1280 ";
+                fileNameAddString = "-crop-720p.mp4";
+                break;
+            /* case "stabilize":
                 actionString = "stabilize";
                 fileNameAddString = "-stab.mp4";
-                break;
+                break; */
             case "deshake":
                 //ffmpeg -i input.mov -vf deshake output.mov
                 actionString = " -vf deshake ";
@@ -217,6 +249,83 @@ public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSe
             }
         }, null);
     }
+    // End of run of runFFmpeg for everything except stabilize
+
+
+
+
+    // Start of stabilize video
+    public void stabilizeVideo() {
+        final File shakeResultsFile = getShakeResultsFile();
+
+        clearOutput();
+
+        String fileName = String.format("%s", mp4inputText.getText().toString());
+        String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+        String videoFilePath = "/storage/emulated/0/DCIM/Camera/" + fileName;
+        String stabilizedVideoFile = "/storage/emulated/0/DCIM/Camera/" + baseName + "-stab.mp4";
+
+        if (shakeResultsFile.exists()) {
+            shakeResultsFile.delete();
+        }
+
+        outputLabel.setText("Output: ");
+        outputLabel.append(baseName);
+        outputLabel.append("-stab.mp4");
+
+        // Start analysis
+        final String analyzeVideoCommand = String.format("-y -i %s -vf vidstabdetect=shakiness=10:accuracy=15:result=%s -f null -", videoFilePath, shakeResultsFile.getAbsolutePath());
+
+        showStabilizeProgressDialog();
+
+        Log.d(TAG, String.format("FFmpeg process started with arguments: '%s'.", analyzeVideoCommand));
+
+        FFmpegKit.executeAsync(analyzeVideoCommand, new FFmpegSessionCompleteCallback() {
+
+
+            @Override
+            public void apply(final FFmpegSession secondSession) {
+                Log.d(TAG, String.format("FFmpeg process exited with state %s and rc %s.%s", secondSession.getState(), secondSession.getReturnCode(), notNull(secondSession.getFailStackTrace(), "\n")));
+
+                if (ReturnCode.isSuccess(secondSession.getReturnCode())) {
+                    final String stabilizeVideoCommand = String.format("-y -i %s -vf vidstabtransform=smoothing=30:input=%s -c:v mpeg4 %s", videoFilePath, shakeResultsFile.getAbsolutePath(), stabilizedVideoFile);
+
+                    Log.d(TAG, String.format("FFmpeg process started with arguments: '%s'.", stabilizeVideoCommand));
+
+                    FFmpegKit.executeAsync(stabilizeVideoCommand, new FFmpegSessionCompleteCallback() {
+
+                        @Override
+                        public void apply(final FFmpegSession thirdSession) {
+                            Log.d(TAG, String.format("FFmpeg process exited with state %s and rc %s.%s", thirdSession.getState(), thirdSession.getReturnCode(), notNull(thirdSession.getFailStackTrace(), "\n")));
+
+                            hideStabilizeProgressDialog();
+
+                            MainActivity.addUIAction(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    if (ReturnCode.isSuccess(thirdSession.getReturnCode())) {
+                                        Log.d(TAG, "Stabilize video completed successfully.");
+
+                                    } else {
+                                        Popup.show(requireContext(), "Stabilize video failed. Please check logs for the details.");
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                } else {
+                    MainActivity.addUIAction(() -> {
+                        hideStabilizeProgressDialog();
+                        Popup.show(requireContext(), "Stabilize video failed. Please check logs for the details.");
+                    });
+                }
+            }
+        });
+
+    }
+
 
 
     public String getSelectedEncodeAction() {
@@ -237,6 +346,27 @@ public class EncoderTabFragment extends Fragment implements AdapterView.OnItemSe
 
     public void clearOutput() {
         outputText.setText("");
+    }
+
+    public File getShakeResultsFile() {
+        return new File(requireContext().getCacheDir(), "transforms.trf");
+    }
+
+/*    protected void showCreateProgressDialog() {
+        createProgressDialog.show();
+    }
+
+    protected void hideCreateProgressDialog() {
+        createProgressDialog.dismiss();
+    }
+*/
+
+    protected void showStabilizeProgressDialog() {
+        stabilizeProgressDialog.show();
+    }
+
+    protected void hideStabilizeProgressDialog() {
+        stabilizeProgressDialog.dismiss();
     }
 
 }
